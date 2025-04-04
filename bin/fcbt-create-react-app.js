@@ -115,7 +115,6 @@ console.log('UI project directory:', uiProjectDir);
 // Change to the UI project directory
 process.chdir(uiProjectDir);
 
-
 // Install UI dependencies
 const uiDeps = [
   'react-router-dom',
@@ -163,10 +162,7 @@ process.chdir(uiDir);
 
 // Create folder structure
 const uiFolders = ["components", "pages", "store", "styles", "utils", "hooks", "services", "types",];
-fs.mkdirSync(uiFolderStructure, { recursive: true });
-uiFolders.forEach(folder => {
-  fs.mkdirSync(path.join(uiFolderStructure, folder), { recursive: true });
-});
+createFolderStructure(uiFolderStructure, uiFolders);
 
 console.log(`Project setup complete for ${appName}!`);
 console.log(`
