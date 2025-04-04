@@ -55,10 +55,13 @@ fvhome-app/
 - After running the command, go to the package.json and add in the scripts
 
 ```json
-   "test": "jest --verbose",
-   "test:watch": "jest --watch --verbose",
-   "test:coverage": "jest --coverage --verbose"
+  "start:local": "webpack serve --open --mode development  --live-reload --hot --node-env=development",
+  "test": "jest --verbose",
+  "test:watch": "jest --watch --verbose",
+  "test:coverage": "jest --coverage --verbose"
 ```
+
+- Add the values for the .ENV and .ENV.Development files.
 
 - You might need to add the jest to the `tsconfig.ts` file if you have intellisense errors.
 

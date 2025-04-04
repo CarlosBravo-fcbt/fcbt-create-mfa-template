@@ -20,21 +20,9 @@ if (!repoName) {
 
 let appName = repoName;
 let imageName = repoName.replace('fvhome', '').replace(/-/g, '');
-let useTypeScript = true;
-
-
-// if (uiOnly && apiOnly) {
-//   console.error('Cannot use both --ui-only and --api-only flags');
-//   process.exit(1);
-// }
 
 const currentDir = process.cwd();
-// let projectDir
-// if (includeParentFolder) {
 let projectDir = path.join(currentDir, repoName);
-// } else {
-//   projectDir = path.join(currentDir);
-// }
 
 // Create project directory
 fs.mkdirSync(projectDir, { recursive: true });
@@ -58,8 +46,6 @@ const uiDir = path.join(projectDir, `src`);
 process.chdir(uiDir);
 
 const { spawnSync } = require('child_process');
-const { create } = require('domain');
-// spawnSync('npx', ['create-mf-app@1.1.8', '--name', 'ui', '--template', template], { stdio: 'inherit', shell: true });
 spawnSync('npx', ['create-mf-app@1.1.8', '--name', 'ui'], { stdio: 'inherit', shell: true });
 
 
@@ -130,7 +116,10 @@ const tsDeps = [
   '@types/react',
   '@types/react-dom',
   '@types/react-redux',
-  'dotenv'
+  'dotenv',
+  'ts-node',
+  'sass-loader',
+  'sass'
 ];
 execSync(`npm install -D ${tsDeps.join(' ')}`, { stdio: 'inherit' });
 
@@ -156,9 +145,7 @@ execSync(`npm install ${fcbtDeps.join(' ')}`, { stdio: 'inherit' });
 fs.rmSync(path.join(uiProjectDir, 'webpack.config.js'), { force: true });
 
 // Add initial folder structure for 
-const uiFolderStructure = uiDir + 'ui/src';
-process.chdir(uiDir);
-
+const uiFolderStructure = path.join(uiProjectDir,'src');
 
 // Create folder structure
 const uiFolders = ["components", "pages", "store", "styles", "utils", "hooks", "services", "types",];
