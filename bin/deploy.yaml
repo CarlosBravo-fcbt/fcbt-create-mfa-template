@@ -1,0 +1,27 @@
+# This pipeline is used to build the FarmView UI and API projects
+# It is triggered on changes to the develop and release/* branches of the repository
+# You need to add this file in the farmview-pipeline repo:  https://dev.azure.com/fcbtdev/FarmView/_git/farmview-pipeline?path=/pipeline-files
+# Delete this lines after you have added the file in the https://dev.azure.com/fcbtdev/FarmView/_git/farmview-pipeline?path=/pipeline-files repo
+
+trigger: none
+
+resources:
+  pipelines:
+  # Get the pipeline resource that is the build needed
+  # Required for the cue-deploy.yaml template
+  - pipeline: sourcepipeline
+    source: {{appName}}-build
+    trigger: 
+      branches:
+        include:
+        - master
+    # Make this trigger off of a build pipeline
+    
+variables:
+  - group: Deployment_Vars
+
+extends:
+  template: ../templates/cue-deploy-extends.yml
+  parameters:
+    imageTag: '$(resources.pipeline.sourcepipeline.runName)'
+    

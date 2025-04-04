@@ -1,0 +1,67 @@
+# This pipeline is used to build the FarmView UI and API projects
+# It is triggered on changes to the develop and release/* branches of the repository
+# You need to add this file in the farmview-pipeline repo:  https://dev.azure.com/fcbtdev/FarmView/_git/farmview-pipeline?path=/pipeline-files
+# Delete this lines after you have added the file in the https://dev.azure.com/fcbtdev/FarmView/_git/farmview-pipeline?path=/pipeline-files repo
+
+trigger: none
+
+resources:
+  repositories:
+    - repository: {{appName}}
+      type: git
+      name: {{appName}}
+      ref: refs/heads/develop
+      trigger:
+        branches:
+          include:
+            - develop
+            - release/*
+
+variables:
+  - name: sourceCodeName
+    value: "{{appName}}"
+  - template: ../variables/shared.yaml
+  - group: Deployment_Vars
+
+extends:
+  template: ../templates/cue-build-extends.yml
+  parameters:
+    sourceCodeName: ${{ variables.sourceCodeName }}
+    buildJobs:
+      - template: templates/react-docker-build.yaml@fcbt-devops-lib
+        parameters:
+          imageRepository: "images/farmview/ui/{{imageName}}"
+          dockerFile: "Dockerfile.reactnpmreplace"
+          sourceCodeName: ${{ variables.sourceCodeName }}
+
+      - template: templates/aspnet-docker-build.yaml@fcbt-devops-lib
+        parameters:
+          imageRepository: "images/farmview/{{imageName}}"
+          sourceCodeName: ${{ variables.sourceCodeName }}
+          dllName: "UPDATE_NAME.dll"
+    buildStages:
+      - stage: UITestWithCoverage
+        dependsOn: [build]
+        displayName: "UI Tests with code coverage"
+        jobs:
+          - job: RunTests
+            displayName: "Run ui tests with code coverage"
+
+            steps:
+              - checkout: ${{ variables.sourceCodeName }}
+              - task: Npm@1
+                displayName: "npm install from private feed"
+                inputs:
+                  command: "install"
+                  workingDir: "$(Build.SourcesDirectory)/src/ui"
+                  customRegistry: "useNpmRc"
+                  customFeed: "fcbt-react-components"
+
+              - script: |
+                  npm run test:coverage
+                workingDirectory: "$(Build.SourcesDirectory)/src/ui"
+                displayName: "Run tests and generate coverage"
+
+              - task: PublishCodeCoverageResults@2
+                inputs:
+                  summaryFileLocation: "$(System.DefaultWorkingDirectory)/src/ui/coverage/cobertura-coverage.xml"
