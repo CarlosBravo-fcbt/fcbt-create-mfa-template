@@ -45,6 +45,10 @@ createFolderStructure(projectDir, folders);
 const uiDir = path.join(projectDir, `src`);
 process.chdir(uiDir);
 
+console.log('Creating UI project...');
+console.log('When prompted, set the same name you choose at the beginning, IMPORTANT!!!');
+
+
 const { spawnSync } = require('child_process');
 spawnSync('npx', ['create-mf-app@1.1.8', '--name', 'ui'], { stdio: 'inherit', shell: true });
 
@@ -83,13 +87,13 @@ fs.copyFileSync(path.join(__dirname, 'deploy.yaml'), deployFilePath);
 replaceInFile(deployFilePath, appName);
 
 // Copy and replace placeholders in Webpack config
-const webpackFilePath = path.join(projectDir, 'src/ui', 'webpack.config.ts');
-fs.copyFileSync(path.join(__dirname, 'webpack.config.ts'), webpackFilePath);
+const webpackFilePath = path.join(projectDir, 'src/ui', 'webpack.config.js');
+fs.copyFileSync(path.join(__dirname, 'webpack.config.js'), webpackFilePath);
 replaceInFile(webpackFilePath, appName);
 
 // Copy .npmrc file to project directory to avoid issues with npm install
 fs.copyFileSync(path.join(__dirname, '.npmrc'), path.join(projectDir + '/src/ui', '.npmrc'));
-fs.copyFileSync(path.join(__dirname, 'jest.config.ts'), path.join(projectDir + '/src/ui', 'jest.config.ts'));
+fs.copyFileSync(path.join(__dirname, 'jest.config.js'), path.join(projectDir + '/src/ui', 'jest.config.js'));
 fs.copyFileSync(path.join(__dirname, '.env'), path.join(projectDir + '/src/ui', '.env'));
 fs.copyFileSync(path.join(__dirname, '.gitignore'), path.join(projectDir + '/src/ui', '.gitignore'));
 fs.copyFileSync(path.join(__dirname, 'setupTests.ts'), path.join(projectDir + '/src/ui/src', 'setupTests.ts'));
