@@ -125,7 +125,9 @@ const tsDeps = [
   'dotenv',
   'ts-node',
   'sass-loader',
-  'sass'
+  'sass',
+  'copy-webpack-plugin',
+  'html-webpack-plugin'
 ];
 execSync(`npm install -D ${tsDeps.join(' ')}`, { stdio: 'inherit' });
 
