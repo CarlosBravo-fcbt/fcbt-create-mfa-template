@@ -37,8 +37,9 @@ extends:
       - template: templates/aspnet-docker-build.yaml@fcbt-devops-lib
         parameters:
           imageRepository: "images/farmview/{{imageName}}"
+          dllName: "UPDATE_NAME.dll --urls=http://0.0.0.0:80"
+          dockerfile: 'Dockerfile.aspnet8'
           sourceCodeName: ${{ variables.sourceCodeName }}
-          dllName: "UPDATE_NAME.dll"
     buildStages:
       - stage: UITestWithCoverage
         dependsOn: [build]

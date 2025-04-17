@@ -68,7 +68,7 @@ function replaceInFile(filePath, appName) {
 fs.renameSync(path.join(uiDir, appName), path.join(uiDir, 'ui'));
 
 // Determine which folders to create
-folders = ['src/api', 'src/ui/test'];
+folders = ['src/api', 'src/ui/src/test'];
 createFolderStructure(projectDir, folders);
 
 // Copy and replace placeholders in CUE file
@@ -93,7 +93,9 @@ replaceInFile(webpackFilePath, appName);
 
 // Copy .npmrc file to project directory to avoid issues with npm install
 fs.copyFileSync(path.join(__dirname, '.npmrc'), path.join(projectDir + '/src/ui', '.npmrc'));
-fs.copyFileSync(path.join(__dirname, 'jest.config.js'), path.join(projectDir + '/src/ui', 'jest.config.js'));
+fs.copyFileSync(path.join(__dirname, 'BioStar.png'), path.join(projectDir + '/src/ui', 'BioStar.png'));
+fs.copyFileSync(path.join(__dirname, 'favicon.ico'), path.join(projectDir + '/src/ui', 'favicon.ico'));
+fs.copyFileSync(path.join(__dirname, 'jest.config.ts'), path.join(projectDir + '/src/ui', 'jest.config.ts'));
 fs.copyFileSync(path.join(__dirname, '.env'), path.join(projectDir + '/src/ui', '.env'));
 fs.copyFileSync(path.join(__dirname, '.gitignore'), path.join(projectDir + '/src/ui', '.gitignore'));
 fs.copyFileSync(path.join(__dirname, 'setupTests.ts'), path.join(projectDir + '/src/ui/src', 'setupTests.ts'));
@@ -149,7 +151,7 @@ execSync(`npm install ${fcbtDeps.join(' ')}`, { stdio: 'inherit' });
 fs.rmSync(path.join(uiProjectDir, 'webpack.config.js'), { force: true });
 
 // Add initial folder structure for 
-const uiFolderStructure = path.join(uiProjectDir,'src');
+const uiFolderStructure = path.join(uiProjectDir, 'src');
 
 // Create folder structure
 const uiFolders = ["components", "pages", "store", "styles", "utils", "hooks", "services", "types",];

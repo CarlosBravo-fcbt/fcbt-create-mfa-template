@@ -2,6 +2,7 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const dotenv = require('dotenv');
 const webpack = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const deps = require("./package.json").dependencies;
 
 // Helper function to resolve environment variables with placeholders
@@ -47,107 +48,134 @@ module.exports = (env, argv) => {
   const envVariables = prepareEnvVariables(rawEnv, isProduction);
 
   // Determine public path
-  const publicPath = determinePublicPath(mode, process.env.{{appName_upper}}_HOST);
+  const publicPath = determinePublicPath(mode, process.env.{{ appName_upper }}_HOST);
 
   return {
     mode,
-  devServer: {
-    port: `${process.env.DEVSERVER_PORT}`,
-    historyApiFallback: true,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-      "Access-Control-Allow-Headers":
-        "X-Requested-With, content-type, Authorization",
-    },
-  },
-  externals: { "react:": "React" },
-  module: {
-    rules: [
-      {
-        test: /\.m?js/,
-        type: "javascript/auto",
-        resolve: {
-          fullySpecified: false,
-        },
+    devServer: {
+      port: `${process.env.DEVSERVER_PORT}`,
+      historyApiFallback: true,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers":
+          "X-Requested-With, content-type, Authorization",
       },
-      {
-        test: /\.module\.(css|s[ac]ss)$/i, // Match *.module.css, *.module.scss, *.module.sass
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: {
-              modules: true, // Enable CSS Modules
-            },
+    },
+    externals: { "react:": "React" },
+    module: {
+      rules: [
+        {
+          test: /\.m?js/,
+          type: "javascript/auto",
+          resolve: {
+            fullySpecified: false,
           },
-          "postcss-loader",
-          "sass-loader",
-        ],
-      },
-      {
-        test: /\.(css|s[ac]ss)$/i,
-        exclude: /\.module\.(css|s[ac]ss)$/i, // Exclude module files
-        use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"],
-      },
-      {
-        test: /\.(ts|tsx|js|jsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
         },
-        resolve: {
-          extensions: [".ts", ".tsx", ".js", ".jsx"],
+        {
+          test: /\.module\.(css|s[ac]ss)$/i, // Match *.module.css, *.module.scss, *.module.sass
+          use: [
+            "style-loader",
+            {
+              loader: "css-loader",
+              options: {
+                modules: true, // Enable CSS Modules
+              },
+            },
+            "postcss-loader",
+            "sass-loader",
+          ],
         },
-      },
-      {
-        test: /\.hbs$/,
-        loader: "handlebars-loader",
-      },
-      
-    ],
-  },
-  output: {
-    publicPath,    
-    filename: '[name].[contenthash].js',
-    chunkFilename: '[id].[contenthash].js',
-    clean: true
-  },
-  plugins: [
-    // Define environment variables
-    new webpack.DefinePlugin(envVariables),
-    new ModuleFederationPlugin({
-      name: "{{appName}}",
-      filename: "remoteEntry.js",
-      remotes: {},
-      exposes: {},
-      shared: {
-        // ...deps,
-        react: {
-          singleton: true,
-          requiredVersion: false,
-          eager: false,
+        {
+          test: /\.(css|s[ac]ss)$/i,
+          exclude: /\.module\.(css|s[ac]ss)$/i, // Exclude module files
+          use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"],
         },
-        "react-dom": {
-          singleton: true,
-          requiredVersion: false,
-          eager: false,
+        {
+          test: /\.(ts|tsx|js|jsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: "babel-loader",
+          },
+          resolve: {
+            extensions: [".ts", ".tsx", ".js", ".jsx"],
+          },
         },
-      },
-    }),
-    new HtmlWebPackPlugin({
-      template: './src/index.html', // Path to your HTML file
-      filename: 'index.html',
-    }),
-  ],
-  resolve: {
-    extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
-    fallback: {
-      fs: false,
-      os: false,
-      path: false,
+        {
+          test: /\.hbs$/,
+          loader: "handlebars-loader",
+        },
+
+      ],
     },
-  },
-  target: "web",
-}
+    output: {
+      publicPath,
+      filename: '[name].[contenthash].js',
+      chunkFilename: '[id].[contenthash].js',
+      clean: true
+    },
+    plugins: [
+      // Define environment variables
+      new webpack.DefinePlugin(envVariables),
+      new ModuleFederationPlugin({
+        name: "{{appName}}",
+        filename: "remoteEntry.js",
+        remotes: {},
+        exposes: {},
+        shared: {
+          // ...deps,
+          react: {
+            singleton: true,
+            requiredVersion: false,
+            eager: false,
+          },
+          "react-dom": {
+            singleton: true,
+            requiredVersion: false,
+            eager: false,
+          },
+        },
+      }),
+      new HtmlWebPackPlugin({
+        template: './src/index.html', // Path to your HTML file
+        filename: 'index.html',
+        templateParameters: {
+          publicPath: publicPath,
+        },
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/img",
+            to: "img",
+            noErrorOnMissing: true,
+          },
+          {
+            from: "src/favicon.ico",
+            to: "favicon.ico",
+            noErrorOnMissing: true,
+          },
+        ],
+      }),
+      new webpack.DefinePlugin({
+        "process.env": JSON.stringify(dotenv.parsed),
+      }),
+    ],
+    optimization: isProduction
+      ? {
+        splitChunks: {
+          chunks: "all",
+        },
+      }
+      : undefined,
+    resolve: {
+      extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
+      fallback: {
+        fs: false,
+        os: false,
+        path: false,
+      },
+    },
+    target: "web",
+  }
 };
