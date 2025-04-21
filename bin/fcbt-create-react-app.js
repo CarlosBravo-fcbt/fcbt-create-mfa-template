@@ -140,6 +140,7 @@ const jestDeps = [
   '@testing-library/jest-dom',
   '@testing-library/user-event',
   '@types/jest',
+  'identity-obj-proxy',
 ];
 execSync(`npm install -D ${jestDeps.join(' ')}`, { stdio: 'inherit' });
 
